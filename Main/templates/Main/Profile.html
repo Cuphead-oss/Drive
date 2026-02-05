@@ -1,0 +1,52 @@
+{% extends 'Drive/base.html' %}
+{% load static %}
+
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'Main/Profile.css' %}">
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<link href="{% static 'Login/code.css' %}" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Kaushan+Script" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script
+  src="https://unpkg.com/htmx.org@1.9.6"
+  integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+  crossorigin="anonymous"
+></script>
+
+{% endblock %}
+
+{% block body %}
+
+{% if profile %}
+     <div class="col-md-12 text-center">
+      <img src="{{ profile.img.url }}" 
+           alt="Profile" class="profile">
+     
+           <form method="post" action="{% url 'rm_profile' %}">{% csrf_token %}
+             <button >Remove Profile Picture</button>
+           </form>
+           </div>
+    {% else %}
+    <div class="col-md-12 text-center">
+      <img src="https://static.vecteezy.com/system/resources/previews/021/548/095/original/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg" 
+           alt="Profile" width="32" height="32" 
+           class="profile">
+           <form method="post" action="{% url 'Profile' %}" enctype="multipart/form-data">{% csrf_token %}
+           {{Img}}
+          <button type="submit">Upload</button>
+         </form>
+         </div>
+    {% endif %}
+   <br>
+    <div class="col-md-12 text-center">
+  <h1>Storage <h3>{{Total_Storage}}/{{User_Storage}} Gb</h3></h1>
+  </div> 
+
+{% endblock %}

@@ -1,0 +1,63 @@
+<script>
+    $(document).ready(function() {
+       
+       $("#code_div").fadeOut(6000); 
+   });
+   </script>
+<div class="container">
+  <div class="row">
+    <div class="col-12 mx-auto" style="max-width: 500px;">
+
+      
+      <div id="forget-container">
+
+        <div id="second">
+          <div class="myform form">
+            <div class="logo mb-3">
+              <div class="col-md-12 text-center">
+                <h1>Email Or UserName</h1>
+              </div>
+            </div>
+
+            <form
+              hx-post="{% url 'Forget' %}"
+              hx-target="#forget-container"
+              hx-swap="innerHTML"
+              name="registration"
+            >
+              {% csrf_token %}
+
+              <div class="form-group">
+                <input
+                  type="text"
+                  name="Email_Name"
+                  class="form-control"
+                  placeholder="Username or Email"
+                >
+              </div>
+
+              <div class="col-md-12 text-center mb-3">
+                <button type="submit"
+                        class="btn btn-block mybtn btn-primary tx-tfm">
+                  Submit
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+   
+
+ {% if messages %}
+ {% for message in messages %}
+   <div class="col-md-12 text-center mb-3" id="code_div">
+    <p>{{message}}</p>
+   </div>
+  {% endfor %}
+  {% endif %}
+
+    </div>
+  </div>
+</div>

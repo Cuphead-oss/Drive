@@ -1,0 +1,49 @@
+{% extends 'Drive/base.html' %}
+{% load static %}
+{% block head %}
+<link href="{% static 'Main/Main.css' %}" rel="stylesheet" >
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<script>
+      $(document).ready(function() {
+    $("#password_change").fadeOut(6000);
+});   
+</script>
+{% for message in messages %}
+  <div class="alert alert-{{ message.tags }}" id="password_change">
+      {{ message }}
+  </div>
+{% endfor %}
+
+{% if loged_in %}
+  <br>
+  <a href="{% url 'Create_File' %}" class="btn">New Folder &plus;</a>
+<div class="container">
+  <div class="row">
+    {% for folder in Folders %}
+      <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+        <div class="card h-100">
+          <img class="card-img-top"
+               src="https://static.vecteezy.com/system/resources/previews/000/439/792/original/vector-folder-icon.jpg"
+               alt="Folder">
+
+          <div class="card-body">
+            <h5 class="card-title">{{ folder.name }}</h5>
+            <a href="{% url 'Files' folder.id  %}" class="btn btn-primary">
+              Open
+            </a>
+            <a href="{% url 'Remove' folder.id  %}" class="btn btn-primary" style="color: red;">
+              Remove
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

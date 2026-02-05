@@ -1,0 +1,16 @@
+.btn {
+background-color: #04AA6D; /* Green background */
+border: none; /* Remove borders */
+color: white; /* White text */
+padding: 12px 24px; /* Space inside button */
+text-align: center; /* Center text */
+text-decoration: none; /* Remove underline */
+display: inline-block;
+font-size: 16px;
+border-radius: 4px; /* Rounded corners */
+cursor: pointer; /* Pointer on hover */
+transition-duration: 0.3s; /* Smooth hover effect */
+}
+btn:hover {
+background-color: #028a57; /* Darker green on hover */
+}

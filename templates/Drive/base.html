@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'Base.css' %}">
+    <title>{% block title %}Drive{% endblock %}</title>
+</head>
+<body>
+    <div class="topnav">
+        <a class="active" href="{% url 'Home' %}" >Home</a>
+        {% if loged_in %}
+        <a href="{% url 'Profile' %}">Profile</a>
+      {% if profile %}
+       <img src="{{ profile.img.url }}" alt="Profile" width="32" height="32" class="profile">
+      {% else %}
+      <img src="https://static.vecteezy.com/system/resources/previews/021/548/095/original/default-profile-picture-avatar-user-avatar-icon-person-icon-head-icon-profile-picture-icons-default-anonymous-user-male-and-female-businessman-photo-placeholder-social-network-avatar-portrait-free-vector.jpg" 
+      alt="Profile" width="32" height="32" class="profile">
+      {% endif %}
+
+        <a href="{% url 'logout' %}" style="float: right;">Logout</a>
+        {% else %}
+        <a href="{% url 'Login' %}" >Login</a>
+        {% endif %}
+      </div> 
+  
+    {% block body %}{% endblock %}
+  
+</body>
+</html>

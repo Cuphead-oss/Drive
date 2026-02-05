@@ -1,0 +1,90 @@
+{% extends 'Drive/base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<link href="{% static 'Login/code.css' %}" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Kaushan+Script" rel="stylesheet">
+<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script
+  src="https://unpkg.com/htmx.org@1.9.6"
+  integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+  crossorigin="anonymous"
+></script>
+{% endblock %}
+
+{% block body %}
+<script>
+    $(document).ready(function() {
+       // Fades out the element with ID 'myDiv' over 3 seconds
+       $("#code_div").fadeOut(6000); 
+   });
+   </script>
+<div class="container">
+    <div class="row">
+        <div class="col-md-5 mx-auto">
+          <div id="second">
+              <div class="myform form ">
+                    <div class="logo mb-3">
+                       <div class="col-md-12 text-center">
+                          <h1 >Code</h1>
+                       </div>
+                    </div>
+                    <form action="{% url 'code' %}" method="post" name="registration"> {% csrf_token %}
+                       <div class="form-group">
+                          
+                          <input type="text"  name="code" class="form-control" id="firstname" aria-describedby="emailHelp" placeholder="Code">
+                    </div>
+                    <div class="col-md-12 text-center mb-3">
+                        <button type="submit" class=" btn btn-block mybtn btn-primary tx-tfm">Submit</button>
+                     </div>
+                          </div>
+                       </div>
+                        </div>
+                    </form>
+                 </div>
+        </div>
+    </div>
+  </div>  
+
+{% if messages %}
+ {% for message in messages %}
+   {% if message.tags == "Code_resend_msg" %}
+   <div class="col-md-12 text-center mb-3" id="code_div">
+    <p>{{message}}</p>
+   </div>
+    {% endif %}
+  {% endfor %}
+  {% endif %}
+
+{% if code_exp %}
+<div class="container" id="main">
+    <div class="row">
+        <div class="col-md-5 mx-auto">
+          <div id="second">
+              <div class="myform form ">
+                    <div class="logo mb-3">
+                       <div class="col-md-12 text-center">
+                        
+                       </div>
+                    </div>
+                    <form hx-post="{% url 'resend' %}" hx-target="this" hx-swap="outerHTML" > {% csrf_token %}
+                    <div class="col-md-12 text-center mb-3">
+                        <button type="submit" class=" btn btn-block mybtn btn-primary tx-tfm">Resend</button>
+                     </div>
+                          </div>
+                       </div>
+                        </div>
+                    </form>
+                 </div>
+        </div>
+    </div>
+  </div> 
+{% endif %}
+{% endblock %}
