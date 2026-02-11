@@ -1,0 +1,44 @@
+# -----------------------
+# Python
+# -----------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# -----------------------
+# Django
+# -----------------------
+db.sqlite3
+media/
+staticfiles/
+
+# If using collectstatic
+static_root/
+
+# -----------------------
+# Environment Variables
+# -----------------------
+.env
+.env.*
+
+# -----------------------
+# IDE / Editor
+# -----------------------
+.vscode/
+.idea/
+
+# -----------------------
+# OS Files
+# -----------------------
+Thumbs.db
+.DS_Store
+
+# -----------------------
+# Logs
+# -----------------------
+*.log
