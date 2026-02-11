@@ -20,6 +20,7 @@ class Files(models.Model):
     #Auto Generated
     link_name=models.CharField(max_length=100) 
     #Meta
+    name=models.CharField(max_length=100)
     size=models.FloatField()
     date=models.DateTimeField(auto_now_add=True)
     extension=models.CharField(max_length=50)

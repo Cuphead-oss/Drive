@@ -8,6 +8,7 @@ urlpatterns = [
     path("Multiple_Upload/Files/<int:id>/",views.Multiple_Upload,name="Multiple_upload"),
     path("Download/<int:id>/",views.Download,name="Download"),
     path("Date/<int:id>/",views.Date,name="Date"),
+    path("Search",views.Search,name="Search"),
     #Rm/Del Functions
     path('Remove_Profile',views.Remove_Profile,name="rm_profile"),
     path('Remove/<int:id>/',views.Remove,name="Remove"),

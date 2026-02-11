@@ -151,8 +151,12 @@ async def Files_(request,id):
         if FileFeild_.is_valid():
           if Total_Storage>User_Storage+file_.size: 
               extension = file_.name.split(".")[-1]
+              name_lis=file_.name.split(".")[0:-1]
+              name_=""
+              for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
+                 name_+=i
               file_size=file_.size/1024**3
-              Upload_File=Files(folder=folder_,image=file_,link_name=token,size=file_size,extension=extension)
+              Upload_File=Files(folder=folder_,image=file_,link_name=token,size=file_size,extension=extension,name=name_)
               await Upload_File.asave()
               storage.User_Storage=storage.User_Storage+int(file_.size)
               await storage.asave()
@@ -170,7 +174,22 @@ async def Files_(request,id):
 
 @login_required(login_url=reverse_lazy('Home'))
 async def Multiple_Upload(request,id):
-   return HttpResponse(id)
+   User_is_login=await sync_to_async(lambda : request.user.is_authenticated)()
+   pram={}
+
+   profile_=await profile_func(request.user)
+
+   if profile_:
+     pram['profile']=profile_
+    
+   if User_is_login:
+      User_=request.user
+      print(User_)
+      pram['User']=User_
+      pram['loged_in']=User_is_login 
+
+      
+   return render(request,'Main/Multiple_file.html',pram)
 
 @login_required(login_url=reverse_lazy('Home'))
 async def Date(request,id):
@@ -212,6 +231,28 @@ async def Date(request,id):
         return render(request,"Main/Date.html",pram)
 
     raise Http404
+
+@login_required(login_url=reverse_lazy('Home'))
+async def Search(request):
+   pram={}
+   profile_=await profile_func(request.user)
+   if profile_:
+     pram['profile']=profile_
+
+   User_loged_in=await sync_to_async(lambda : request.user.is_authenticated)()
+    
+   if User_loged_in:
+     User_=request.user
+     pram["User"]=User_
+    
+     pram['loged_in']=User_loged_in
+
+   if request.method=='POST':
+      val=request.POST.get('query')
+      queryset=await sync_to_async(lambda : Files.objects.select_related('folder').filter(name__contains=val,folder__user=request.user))()
+   pram['query_']=await sync_to_async(list)(queryset)
+
+   return render(request,"Main/Search.html",pram)
 
 @login_required(login_url=reverse_lazy('Home'))
 def Download(request,id):
@@ -256,16 +297,15 @@ async def Remove_Profile(request):
     return await sync_to_async(redirect)('Profile')   
     
 @login_required(login_url=reverse_lazy('Home'))
-async def Remove_File(request,id,f_id): # Bug in this function any user is able to del any other files of user
+async def Remove_File(request,id,f_id): 
     
     folder= await sync_to_async(lambda : Folder.objects.filter(id=f_id,user=request.user).prefetch_related('Files').first())()
     File=await folder.Files.aget(id=id)
-    print("Test" , File.id)
     storage=await Storage.objects.aget(user=request.user)
     size=File.size*1024**3
     storage.User_Storage=storage.User_Storage-size
    
-    rmFile([File])
+    await rmFile([File])
 
     await storage.asave()
     await File.adelete()
