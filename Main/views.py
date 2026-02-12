@@ -13,7 +13,7 @@ from datetime import datetime
 #models
 from .models import Folder,Profile,Files,Storage
 #Form
-from .forms import Img_upload,FormFeild
+from .forms import Img_upload,FormFeild,MultipleFile
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 import re
@@ -249,10 +249,63 @@ async def Search(request):
 
    if request.method=='POST':
       val=request.POST.get('query')
-      queryset=await sync_to_async(lambda : Files.objects.select_related('folder').filter(name__contains=val,folder__user=request.user))()
+      queryset=await sync_to_async(lambda : Files.objects.select_related('folder').filter(name__contains=val))()
+      
    pram['query_']=await sync_to_async(list)(queryset)
+   print(pram['query_'])
 
    return render(request,"Main/Search.html",pram)
+
+
+@login_required(login_url=reverse_lazy('Home'))
+async def Multiple_Upload(request,id):
+   User_is_login=await sync_to_async(lambda : request.user.is_authenticated)()
+   pram={}
+
+   profile_=await profile_func(request.user)
+
+   if profile_:
+     pram['profile']=profile_
+    
+   if User_is_login:
+      User_=request.user
+      print(User_)
+      pram['User']=User_
+      pram['loged_in']=User_is_login 
+   
+   folder_=await Folder.objects.prefetch_related('Files').aget(user=request.user,id=id)
+   form = MultipleFile(request.POST, request.FILES)
+   storage,_=await Storage.objects.aget_or_create(user=pram["User"])
+   Total_Storage=storage.Total_Storage
+   User_Storage=storage.User_Storage
+   name_=""
+   if request.method == 'POST':
+       Files_ = request.FILES.getlist('Files')
+       
+       for file in Files_: #(O(n^2) algo )
+          if  Total_Storage>User_Storage+file.size: 
+            extension = file.name.split(".")[-1]
+            name_lis=file.name.split(".")[0:-1]
+
+            for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
+                 name_+=i
+
+            token = secrets.token_urlsafe(32) 
+            file_size=file.size/1024**3
+            Upload_File=Files(folder=folder_,image=file,link_name=token,size=file_size,extension=extension,name=name_)
+            await Upload_File.asave()
+            storage.User_Storage=storage.User_Storage+int(file.size)
+            await storage.asave()
+            User_Storage=storage.User_Storage
+            print("NAME-------------------->",file.name)
+            name_=""
+          else:
+             pass
+            
+       return redirect("Files",id)
+   pram['form']= form
+   pram['id']=id
+   return render(request, "Main/Multiple_file.html", pram)
 
 @login_required(login_url=reverse_lazy('Home'))
 def Download(request,id):

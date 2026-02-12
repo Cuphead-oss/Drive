@@ -9,17 +9,6 @@
 {% endblock %}
 
 {% block body %}
-
-{% if messages %}
-{% for message in messages %}
-{% if message.tags == "Storage_Full" %}
-<div class="col-md-12 text-center mb-3" id="storage_full">
-<p>{{message}}</p>
-{% endif %}
-</div>
-{% endfor %}
-{% endif %}
-
 <div class="row align-items-center">
   
 <div class="row">
