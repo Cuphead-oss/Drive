@@ -390,3 +390,5 @@ def Files_names(Folder):
 def rmFile(Files):
    for File in Files:
       os.remove(File.image.path) 
+
+#This is multiple file upload
