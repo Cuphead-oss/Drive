@@ -12,5 +12,5 @@ class MultipleFile(forms.Form):
             "name": "images",
             "type": "File",
             "class": "form-control",
-            "multiple": "True",
+            "multiple": True,
     }), label = "")

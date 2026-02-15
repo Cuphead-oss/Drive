@@ -21,6 +21,8 @@ import math
 import os
 import shutil
 from Drive.settings import BASE_DIR
+from django.core.exceptions import ValidationError
+from django.db import transaction
 #######################
 import sys
 # Create your views here.
@@ -259,6 +261,7 @@ async def Search(request):
 
 @login_required(login_url=reverse_lazy('Home'))
 async def Multiple_Upload(request,id):
+
    User_is_login=await sync_to_async(lambda : request.user.is_authenticated)()
    pram={}
 
@@ -276,37 +279,18 @@ async def Multiple_Upload(request,id):
    folder_=await Folder.objects.prefetch_related('Files').aget(user=request.user,id=id)
    form = MultipleFile(request.POST, request.FILES)
    storage,_=await Storage.objects.aget_or_create(user=pram["User"])
-   Total_Storage=storage.Total_Storage
-   User_Storage=storage.User_Storage
-   name_=""
-   if request.method == 'POST':
-       Files_ = request.FILES.getlist('Files')
-       
-       for file in Files_: #(O(n^2) algo )
-          if  Total_Storage>User_Storage+file.size: 
-            extension = file.name.split(".")[-1]
-            name_lis=file.name.split(".")[0:-1]
+   
+   if request.method=='POST':
+     
+     flag=await mulupload(request,storage,folder_,id)
+     if flag:
+      return redirect("Files",id)
 
-            for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
-                 name_+=i
-
-            token = secrets.token_urlsafe(32) 
-            file_size=file.size/1024**3
-            Upload_File=Files(folder=folder_,image=file,link_name=token,size=file_size,extension=extension,name=name_)
-            await Upload_File.asave()
-            storage.User_Storage=storage.User_Storage+int(file.size)
-            await storage.asave()
-            User_Storage=storage.User_Storage
-            print("NAME-------------------->",file.name)
-            name_=""
-          else:
-             pass
-            
-       return redirect("Files",id)
    pram['form']= form
    pram['id']=id
    return render(request, "Main/Multiple_file.html", pram)
 
+ 
 @login_required(login_url=reverse_lazy('Home'))
 def Download(request,id):
    img_= Files.objects.get(id=id)
@@ -391,4 +375,51 @@ def rmFile(Files):
    for File in Files:
       os.remove(File.image.path) 
 
+@sync_to_async
+def mulupload(request,storage,folder_,id):
+ try:  
+   Total_Storage=storage.Total_Storage
+   User_Storage=storage.User_Storage
+   name_=""
+   Files_ = request.FILES.getlist('Files')
+   with transaction.atomic(): # if error occurs roll back all files upload
+        for file in Files_: #(O(n^2) algo )
+          if  Total_Storage>User_Storage+file.size: 
+            extension = file.name.split(".")[-1]
+            name_lis=file.name.split(".")[0:-1]
+
+            size=file.size # size of file in bytes
+            for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
+                name_+=i
+
+            # Can not add multiple file validator in valiadtor so i added it here ofc there are better ways but rn now this have to do 
+            valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip")
+
+            if size > 52428800:
+                messages.add_message(request,999,"File size too large to upload",extra_tags="Storage_full") # reusing message tag
+                raise ValidationError("To large file")
+
+            if not file.name.endswith(valid_extensions):
+               messages.add_message(request,999,"Invalid file type",extra_tags="Storage_full")# reusing message tag
+               raise ValidationError("Invalid file type")
+               
+
+            token = secrets.token_urlsafe(32) 
+            file_size=size/1024**3 # size of file in Mb
+            Upload_File=Files(folder=folder_,image=file,link_name=token,size=file_size,extension=extension,name=name_)
+            Upload_File.save()
+            storage.User_Storage=storage.User_Storage+int(file.size)
+            storage.save()
+            User_Storage=storage.User_Storage
+            name_=""
+          else:
+             messages.add_message(request,999,"Can not add any more Files Storage is Full",extra_tags="Storage_full")
+             raise ValidationError("Storage full")
+          
+        return True
+          
+     
+ except  ValidationError as e:
+    return False
+    
 #This is multiple file upload
