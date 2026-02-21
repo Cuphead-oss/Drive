@@ -22,7 +22,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('Main.urls')),
-    path('Login',include('Login.urls'))
+    path('Login',include('Login.urls')),
+    path('Fileshare/<str:token>/',include("Fileshare.urls"))
 ]
 
 #If in Production serve while in Product Ninx or WhiteNoise will server them Production /Debug=False Final Product Debug=True

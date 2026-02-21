@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 def File_is_Valid(value):
     file_size=value.size  
     
-    valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip")
+    valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip",".PDF")
     if file_size > 52428800:
         raise ValidationError("You cannot upload file more than 50Mb")
     elif not value.name.endswith(valid_extensions):

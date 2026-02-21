@@ -73,6 +73,7 @@
       <p>{{file.name}}</p>
       <p>Type: {{file.extension}}</p>
       <h6 class="card-title">Upoladed At : {{ file.date }}</h6>
+      <p style="display: none;" id="copy_text{{file.link_name}}">{{Absolute_url}}Fileshare/{{file.link_name}}</p>
 
       <a href="{% url 'Download' file.id %}" class="btn btn-primary">Download</a>
 
@@ -81,6 +82,7 @@
          style="color: red;">
         Remove
       </a>
+      <button onclick="copytext('{{file.link_name}}')">Share</button>
     </div>
 
   </div>
@@ -88,4 +90,14 @@
 
 {% endfor %}
 </div>
+
+<script>
+  function copytext(link){
+    const text=document.getElementById('copy_text'+link).innerText;
+    navigator.clipboard.writeText(text)
+    .then(()=>{
+      alert('Link is copied')
+    });
+  }
+</script>
 {% endblock %}

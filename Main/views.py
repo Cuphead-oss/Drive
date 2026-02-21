@@ -23,7 +23,7 @@ import shutil
 from Drive.settings import BASE_DIR
 from django.core.exceptions import ValidationError
 from django.db import transaction
-#######################
+
 import sys
 # Create your views here.
 
@@ -138,16 +138,6 @@ async def Files_(request,id):
     if request.method=='POST':
         FileFeild_=FormFeild(request.POST,request.FILES)
         file_=request.FILES['File']
-        #####################
-        dl=0
-        total_size=int(file_.size)
-        print("Total size------------> ",total_size)
-        for c in file_.chunks(chunk_size=4096):
-           dl+=len(c)
-           done = int(50 * dl / total_size)
-           sys.stdout.write("\r[%s%s]" % ('=' * done, ' ' * (50-done)) )    
-           sys.stdout.flush()
-        #######################
         token = secrets.token_urlsafe(32)
 
         if FileFeild_.is_valid():
@@ -171,6 +161,7 @@ async def Files_(request,id):
                 
     pram['form']=FileFeild_
     pram['Files']=Files_in_current_Folder
+    pram['Absolute_url']=request.build_absolute_uri(reverse_lazy('Home'))
     
     return render(request,"Main/File.html",pram)
 
@@ -251,7 +242,7 @@ async def Search(request):
 
    if request.method=='POST':
       val=request.POST.get('query')
-      queryset=await sync_to_async(lambda : Files.objects.select_related('folder').filter(name__contains=val))()
+      queryset=await sync_to_async(lambda : Files.objects.select_related('folder').filter(name__contains=val,folder__user=request.user))()
       
    pram['query_']=await sync_to_async(list)(queryset)
    print(pram['query_'])
@@ -293,7 +284,7 @@ async def Multiple_Upload(request,id):
  
 @login_required(login_url=reverse_lazy('Home'))
 def Download(request,id):
-   img_= Files.objects.get(id=id)
+   img_= Files.objects.get(id=id,folder__user=request.user)
    folder=img_.folder
    if request.user==folder.user:
      file_path=img_.image.path
@@ -393,13 +384,13 @@ def mulupload(request,storage,folder_,id):
                 name_+=i
 
             # Can not add multiple file validator in valiadtor so i added it here ofc there are better ways but rn now this have to do 
-            valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip")
+            valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip",".PDF")
 
-            if size > 52428800:
+            if size > 52428800:                
                 messages.add_message(request,999,"File size too large to upload",extra_tags="Storage_full") # reusing message tag
                 raise ValidationError("To large file")
 
-            if not file.name.endswith(valid_extensions):
+            if not file.name.endswith(valid_extensions):               
                messages.add_message(request,999,"Invalid file type",extra_tags="Storage_full")# reusing message tag
                raise ValidationError("Invalid file type")
                
@@ -412,13 +403,13 @@ def mulupload(request,storage,folder_,id):
             storage.save()
             User_Storage=storage.User_Storage
             name_=""
+
           else:
              messages.add_message(request,999,"Can not add any more Files Storage is Full",extra_tags="Storage_full")
              raise ValidationError("Storage full")
           
         return True
-          
-     
+               
  except  ValidationError as e:
     return False
     
