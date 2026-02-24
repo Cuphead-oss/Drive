@@ -34,3 +34,5 @@ def Share_Download(request,token):
    response['Content-Disposition'] = f'attachment; filename="{name}"'
    return response
    
+async def Inbox(request):
+    return render(request,"Fileshare/Inbox.html")

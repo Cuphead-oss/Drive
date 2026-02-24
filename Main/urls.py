@@ -9,6 +9,8 @@ urlpatterns = [
     path("Download/<int:id>/",views.Download,name="Download"),
     path("Date/<int:id>/",views.Date,name="Date"),
     path("Search",views.Search,name="Search"),
+    path("shareuser/<str:token>/",views.Share_To_User,name="share_to_user"),
+    path("saringFile/<str:token>/<int:id>/",views.Share_File_To,name="sharing"),
     #Rm/Del Functions
     path('Remove_Profile',views.Remove_Profile,name="rm_profile"),
     path('Remove/<int:id>/',views.Remove,name="Remove"),

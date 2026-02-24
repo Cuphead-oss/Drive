@@ -10,8 +10,10 @@ from django.contrib import messages
 import secrets
 from django.utils import timezone
 from datetime import datetime
+from django.db.models import Q
 #models
 from .models import Folder,Profile,Files,Storage
+from Fileshare.models import ShareFile
 #Form
 from .forms import Img_upload,FormFeild,MultipleFile
 from django.shortcuts import get_object_or_404
@@ -23,7 +25,6 @@ import shutil
 from Drive.settings import BASE_DIR
 from django.core.exceptions import ValidationError
 from django.db import transaction
-
 import sys
 # Create your views here.
 
@@ -144,9 +145,7 @@ async def Files_(request,id):
           if Total_Storage>User_Storage+file_.size: 
               extension = file_.name.split(".")[-1]
               name_lis=file_.name.split(".")[0:-1]
-              name_=""
-              for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
-                 name_+=i
+              name_=" ".join(name_lis)
               file_size=file_.size/1024**3
               Upload_File=Files(folder=folder_,image=file_,link_name=token,size=file_size,extension=extension,name=name_)
               await Upload_File.asave()
@@ -284,7 +283,7 @@ async def Multiple_Upload(request,id):
  
 @login_required(login_url=reverse_lazy('Home'))
 def Download(request,id):
-   img_= Files.objects.get(id=id,folder__user=request.user)
+   img_= Files.objects.prefetch_related('folder').filter(id=id,folder__user=request.user).first()
    folder=img_.folder
    if request.user==folder.user:
      file_path=img_.image.path
@@ -294,6 +293,36 @@ def Download(request,id):
      response['Content-Disposition'] = f'attachment; filename="{name}"'
      return response
    raise Http404
+
+@login_required(login_url=reverse_lazy('Home'))
+async def Share_To_User(request,token):
+    pram={}
+
+    User_loged_in=await sync_to_async(lambda : request.user.is_authenticated)()
+
+    if User_loged_in:
+        User_=request.user
+        pram["User"]=User_
+        pram['profile']=await profile_func(request.user)
+
+    pram['loged_in']=User_loged_in
+    pram['token']=token
+
+    Sended_to=await sync_to_async(list)(request.user.Shared_to_usr.all().values_list('shared_to',flat=True).distinct())
+
+    unique_users = await sync_to_async(
+    lambda: list(User.objects.filter(id__in=Sended_to)))()
+    pram['Users_Sended_to']= await sync_to_async (list)(unique_users)
+
+    if request.method=='POST':
+       user=request.POST.get('user')
+       user_queryset=await sync_to_async(User.objects.filter)(Q(username=user) | Q(email=user))
+       pram['user_querry']=await sync_to_async(list)(user_queryset)
+       pram['token']=token
+       pram['Users_Sended_to']=unique_users
+       return render(request,"Main/partials/parshare.html",pram)
+      
+    return render(request,"Main/Share_to_user.html",pram)
 
 # All Del Functions
 
@@ -380,8 +409,7 @@ def mulupload(request,storage,folder_,id):
             name_lis=file.name.split(".")[0:-1]
 
             size=file.size # size of file in bytes
-            for i in name_lis: # This will cuz a a delay if a long length name is added to the file which may cuz DOS attack (sol: limit user file name)
-                name_+=i
+            name_=" ".join(name_lis)
 
             # Can not add multiple file validator in valiadtor so i added it here ofc there are better ways but rn now this have to do 
             valid_extensions = ('.jpg', '.jpeg', '.png', '.pdf','.pptx',".txt",".zip",".PDF")
@@ -402,7 +430,7 @@ def mulupload(request,storage,folder_,id):
             storage.User_Storage=storage.User_Storage+int(file.size)
             storage.save()
             User_Storage=storage.User_Storage
-            name_=""
+            name_=None
 
           else:
              messages.add_message(request,999,"Can not add any more Files Storage is Full",extra_tags="Storage_full")
@@ -412,5 +440,11 @@ def mulupload(request,storage,folder_,id):
                
  except  ValidationError as e:
     return False
-    
+
+@login_required(login_url=reverse_lazy('Home'))
+async def Share_File_To(request,token,id):
+    Share_=await sync_to_async(lambda : Files.objects.prefetch_related('folder__user').filter(link_name=token,folder__user=request.user).first())()
+    Send_User=await User.objects.filter(id=id).afirst()
+    await ShareFile.objects.acreate(shared_by=request.user,shared_to=Send_User,file=Share_)
+    return redirect("share_to_user",token)
 #This is multiple file upload

@@ -14,7 +14,7 @@
         {% if loged_in %}
         <a href="{% url 'Profile' %}">Profile</a>
 
-       <form method="POST" action="{% url 'Search' %}" style="float:right; display:flex; align-items:center; gap:5px;">
+<form method="POST" action="{% url 'Search' %}" style="float:right; display:flex; align-items:center; gap:5px;">
     {% csrf_token %}
     <input type="search" name="query" placeholder="Search for a File..." 
            style="padding:5px; border-radius:4px; border:1px solid #ccc;">

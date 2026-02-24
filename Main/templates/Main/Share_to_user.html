@@ -1,0 +1,31 @@
+{% extends "Drive/base.html" %}
+
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'Main/Share.css' %}">
+
+<script
+  src="https://unpkg.com/htmx.org@1.9.6"
+  integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+  crossorigin="anonymous"
+></script>
+
+{% endblock %}
+
+{% block body %}
+<div class="search-bar">
+<form
+    hx-post="{% url 'share_to_user' token %}"
+    hx-target="#result"
+    hx-swap="innerHTML"
+    name="registration"
+>
+    {% csrf_token %}
+    <input type="search" name="user" placeholder="Search for a User by Name or Email..." 
+           style="padding:5px; border-radius:10px; border:1px solid #ccc; width: 250px;">
+    <button type="submit" style="padding:5px 10px;">Search</button>
+</form>
+</div>
+{% include "Main/partials/parshare.html" %}
+{% endblock %}

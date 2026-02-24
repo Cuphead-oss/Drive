@@ -1,0 +1,25 @@
+
+<div id="result">
+  <div id="User">
+    {% if user_querry %}
+       {% for user in user_querry %}
+    <div class="user-row">
+        <p>{{ user.username }}</p>
+        <a href="{% url 'sharing' token user.id %}">Send</a>
+    </div>
+       {% endfor %}
+    {% endif %}
+  </div>
+  
+  <div id="Recent-row">
+    <h3>Recent</h3>
+  </div>
+  
+  {% for usr in Users_Sended_to %}
+  <div id="usr">
+     <p>{{usr.username}}</p>
+  {% endfor %}
+  </div>
+
+
+

@@ -22,7 +22,7 @@ class Files(models.Model):
     #Meta
     name=models.CharField(max_length=100)
     size=models.FloatField()
-    date=models.DateTimeField(auto_now_add=True)
+    date=models.DateTimeField(auto_now_add=True)              
     extension=models.CharField(max_length=50)
 
 class Storage(models.Model):

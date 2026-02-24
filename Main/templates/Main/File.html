@@ -82,7 +82,9 @@
          style="color: red;">
         Remove
       </a>
-      <button onclick="copytext('{{file.link_name}}')">Share</button>
+      <button class="share-btn" onclick="copytext('{{file.link_name}}')">Share</button>
+       <br>
+      <a href="{% url 'share_to_user' file.link_name %}" class="share-btn">Share to a User</a>
     </div>
 
   </div>

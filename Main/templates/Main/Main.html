@@ -20,7 +20,11 @@
 
 {% if loged_in %}
   <br>
-  <a href="{% url 'Create_File' %}" class="btn">New Folder &plus;</a>
+ 
+<div class="top-bar">
+    <a href="{% url 'Create_File' %}" class="btn">New Folder &plus;</a>
+    <a href="#" class="inbox">Inbox</a>
+</div>
 <div class="container">
   <div class="row">
     {% for folder in Folders %}
