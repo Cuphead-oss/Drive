@@ -58,3 +58,18 @@
     align-items: center;      /* vertical */
     height: 100px;            /* set height */
 }
+
+
+.Share {
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.Share:hover {
+    background-color: #0056b3;
+}

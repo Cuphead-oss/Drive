@@ -7,6 +7,7 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth.models import User
 from django.urls import reverse_lazy
 from django.http import FileResponse,Http404
+from .models import ShareFile
 
 async def Fileshare(request,token):
     pram={}
@@ -33,6 +34,3 @@ def Share_Download(request,token):
    response['Content-Type'] = 'application/octet-stream'
    response['Content-Disposition'] = f'attachment; filename="{name}"'
    return response
-   
-async def Inbox(request):
-    return render(request,"Fileshare/Inbox.html")

@@ -16,8 +16,8 @@
   </div>
   
   {% for usr in Users_Sended_to %}
-  <div id="usr">
-     <p>{{usr.username}}</p>
+  <div id="usr">     
+     <a href="{% url 'sharing' token usr.id %}" class="Share">Share to {{usr.username}}</a>
   {% endfor %}
   </div>
 

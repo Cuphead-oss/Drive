@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse,Http404
 from django.contrib.auth.models import User
+from django.contrib.auth import get_user
 import asyncio
 from asgiref.sync import sync_to_async
 from django.contrib.auth.decorators import login_required
@@ -30,30 +31,24 @@ import sys
 
 async def Home(request):
     pram={}
-    User_loged_in=await sync_to_async(lambda : request.user.is_authenticated)()
+    User_=await sync_to_async(get_user)(request)
 
-    if User_loged_in:
-        User_=request.user
+    if User_.is_authenticated:
+        
         pram["User"]=User_
         folder=await print_folder_names(User_)
         pram['Folders']=folder
-        pram['profile']=await profile_func(request.user)
+        pram['profile']=await profile_func(User_)
+        pram['loged_in']=User_
 
-    
-    pram['loged_in']=User_loged_in
-    
-
-    return render(request,'Main/Main.html',pram)
+    return await sync_to_async(render)(request,'Main/Main.html',pram)
 
 @login_required(login_url=reverse_lazy('Home'))
 async def profile(request):
     pram={}
-    User_loged_in=await sync_to_async(lambda : request.user.is_authenticated)()
-    
-    
-    if User_loged_in:
-      User_=request.user
-      pram["User"]=User_
+    User_=await sync_to_async(get_user)(request)
+    if User_.is_authenticated:
+     pram["User"]=User_
     
     storage,_=await Storage.objects.aget_or_create(user=pram["User"])
 
@@ -61,11 +56,11 @@ async def profile(request):
     pram["User_Storage"]=round(storage.User_Storage/1024**3,2)
     print(float(pram["User_Storage"]))
 
-    pram['loged_in']=User_loged_in
+    pram['loged_in']=User_.is_authenticated
     Img_Form=Img_upload()
     pram['Img']=Img_Form
 
-    profile = await Profile.objects.filter(user=request.user).afirst()
+    profile = await Profile.objects.filter(user=User_).afirst()
     
     pram['profile']=profile
    
@@ -73,8 +68,7 @@ async def profile(request):
         Img_Form=Img_upload(request.POST,request.FILES)
         if Img_Form.is_valid():
           img_=Img_Form.cleaned_data['img_']
-          img,created=await Profile.objects.aget_or_create(user=request.user,defaults={'img': img_})
-
+          img,created=await Profile.objects.aget_or_create(user=User_,defaults={'img': img_})
           if not created:
               img.img = img_
               await img.asave()
@@ -111,25 +105,21 @@ async def Create_File(request):
 @login_required(login_url=reverse_lazy('Home'))
 async def Files_(request,id):
     pram={}
+    User_=await sync_to_async(get_user)(request)
     
-    profile_=await profile_func(request.user)
+    profile_=await profile_func(User_)
     if profile_:
      pram['profile']=profile_
-    User_loged_in=await sync_to_async(lambda : request.user.is_authenticated)()
     
-    if User_loged_in:
-      User_=request.user
+    if User_.is_authenticated:
       pram["User"]=User_
     
-    pram['loged_in']=User_loged_in
+    pram['loged_in']=User_.is_authenticated
 
-    folder_=await Folder.objects.prefetch_related('Files').aget(user=request.user,id=id)
+    folder_=await Folder.objects.prefetch_related('Files').aget(user=User_,id=id)
     
     pram['id']=id
-    print(id)
-    
     Files_in_current_Folder=await Files_names(folder_)
-    print(Files_in_current_Folder)
 
     FileFeild_=FormFeild()
     
@@ -308,18 +298,16 @@ async def Share_To_User(request,token):
     pram['loged_in']=User_loged_in
     pram['token']=token
 
-    Sended_to=await sync_to_async(list)(request.user.Shared_to_usr.all().values_list('shared_to',flat=True).distinct())
-
+    Sended_to=await sync_to_async(list)(ShareFile.objects.filter(shared_by=request.user).values_list('shared_to',flat=True).distinct())
     unique_users = await sync_to_async(
     lambda: list(User.objects.filter(id__in=Sended_to)))()
     pram['Users_Sended_to']= await sync_to_async (list)(unique_users)
+
 
     if request.method=='POST':
        user=request.POST.get('user')
        user_queryset=await sync_to_async(User.objects.filter)(Q(username=user) | Q(email=user))
        pram['user_querry']=await sync_to_async(list)(user_queryset)
-       pram['token']=token
-       pram['Users_Sended_to']=unique_users
        return render(request,"Main/partials/parshare.html",pram)
       
     return render(request,"Main/Share_to_user.html",pram)
@@ -350,6 +338,7 @@ async def Remove_Profile(request):
 
     if request.method=='POST':
         pfp=await Profile.objects.aget(user=request.user)
+        os.remove(pfp.img.path) #commit changes 
         await pfp.adelete()
     return await sync_to_async(redirect)('Profile')   
     

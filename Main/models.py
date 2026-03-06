@@ -29,3 +29,6 @@ class Storage(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
     Total_Storage=models.BigIntegerField(default=5*1024**3)
     User_Storage=models.BigIntegerField(default=0)
+
+    def __str__(self):
+        return self.user.username

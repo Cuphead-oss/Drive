@@ -2,10 +2,10 @@ from django import forms
 from . import validator
 
 class Img_upload(forms.Form):
-    img_=forms.ImageField(validators=[validator.File_is_Valid])
+    img_=forms.ImageField()
 
 class FormFeild(forms.Form):
-    File=forms.FileField(validators=[validator.File_is_Valid])
+    File=forms.FileField()
 
 class MultipleFile(forms.Form):
     Files=forms.FileField(widget=forms.TextInput(attrs={
