@@ -75,7 +75,7 @@ async def profile(request):
           Img_form=Img_upload()
           pram['Img']=Img_form
 
-          return render(request,'Main/Profile.html',pram)
+          return redirect('Profile')
         
     return render(request,'Main/Profile.html',pram)
 
@@ -153,25 +153,6 @@ async def Files_(request,id):
     pram['Absolute_url']=request.build_absolute_uri(reverse_lazy('Home'))
     
     return render(request,"Main/File.html",pram)
-
-@login_required(login_url=reverse_lazy('Home'))
-async def Multiple_Upload(request,id):
-   User_is_login=await sync_to_async(lambda : request.user.is_authenticated)()
-   pram={}
-
-   profile_=await profile_func(request.user)
-
-   if profile_:
-     pram['profile']=profile_
-    
-   if User_is_login:
-      User_=request.user
-      print(User_)
-      pram['User']=User_
-      pram['loged_in']=User_is_login 
-
-      
-   return render(request,'Main/Multiple_file.html',pram)
 
 @login_required(login_url=reverse_lazy('Home'))
 async def Date(request,id):
