@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'saves-arising-declared-highs.trycloudflare.com']
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+SECRET_KEY = os.getenv('Django_Drive')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -151,8 +151,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST_USER='subhyoyogg@gmail.com'
-EMAIL_HOST_PASSWORD='pufqzywkklkpgdau'
+EMAIL_HOST_USER=os.getenv('email')
+EMAIL_HOST_PASSWORD=os.getenv('email_pass')
 
 MEDIA_ROOT=os.path.join(BASE_DIR,'media')
 MEDIA_URL='/media/'
